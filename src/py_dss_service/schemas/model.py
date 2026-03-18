@@ -27,26 +27,25 @@ class JobModelSnapshot(BaseModel):
     num_loads: int = Field(default=0, description="Number of loads")
     num_transformers: int = Field(default=0, description="Number of transformers")
     
-    # Detailed model data
     summary: Optional[dict[str, Any]] = Field(
         default=None,
-        description="Circuit summary from dss_tools.model.summary_df",
+        description="Model summary as key-value pairs (e.g. {'buses': 10, 'line': 5, ...})",
     )
     buses: Optional[dict[str, Any]] = Field(
         default=None,
-        description="Bus data - keys are bus names",
+        description="Bus data as column-oriented records: {'name': [...], 'kv_base': [...], ...}",
     )
     lines: Optional[dict[str, Any]] = Field(
         default=None,
-        description="Line data - keys are line names",
+        description="Line data as column-oriented records: {'name': [...], 'bus1': [...], ...}",
     )
     loads: Optional[dict[str, Any]] = Field(
         default=None,
-        description="Load data - keys are load names",
+        description="Load data as column-oriented records: {'name': [...], 'bus1': [...], ...}",
     )
     segments: Optional[dict[str, Any]] = Field(
         default=None,
-        description="Segment data - keys are segment identifiers",
+        description="Segment data as column-oriented records: {'name': [...], 'bus1': [...], ...}",
     )
 
 

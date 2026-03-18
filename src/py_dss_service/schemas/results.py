@@ -25,18 +25,16 @@ class JobResult(BaseModel):
     
     converged: bool = Field(..., description="Whether the power flow solution converged")
     
-    # Circuit summary from py-dss-toolkit (index preserved as keys)
     circuit_summary: Optional[dict[str, Any]] = Field(
         default=None,
-        description="Circuit summary: keys are quantity names, values are column data. "
-                    "Example: {'Total Power': {'Results': 100.0}, ...}",
+        description="Circuit summary as column-oriented records. "
+                    "Example: {'P feeder (kW)': [100.0], 'Q feeder (kvar)': [50.0], ...}",
     )
 
-    # Voltage results (line-neutral) - keys are bus names
-    voltages_ln: Optional[dict[str, dict[str, Any]]] = Field(
+    voltages_ln: Optional[dict[str, Any]] = Field(
         default=None,
-        description="Line-neutral voltages: keys are bus names, values contain magnitude and angle. "
-                    "Example: {'sourcebus': {'magnitude': {...}, 'angle': {...}}, ...}",
+        description="Line-neutral voltages: {'magnitude': {bus: {node: val}}, "
+                    "'angle': {bus: {node: val}}}",
     )
 
     # Execution metadata
