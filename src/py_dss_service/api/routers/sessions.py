@@ -15,6 +15,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, status
 
 from py_dss_service.common.errors import JobExecutionError, ScriptValidationError
+from py_dss_service.common.records import cols_to_named
 from py_dss_service.engine.validation import get_script_lines, validate_dss_script
 from py_dss_service.schemas.session import (
     ApplyActionsRequest,
@@ -440,7 +441,7 @@ async def get_model_buses(session_id: str) -> dict[str, Any]:
     session.touch()
 
     with session.lock:
-        buses = session.runner.get_buses()
+        buses = cols_to_named(session.runner.get_buses())
         return {"count": len(buses) if buses else 0, "buses": buses or {}}
 
 
@@ -452,7 +453,7 @@ async def get_model_lines(session_id: str) -> dict[str, Any]:
     session.touch()
 
     with session.lock:
-        lines = session.runner.get_lines()
+        lines = cols_to_named(session.runner.get_lines())
         return {"count": len(lines) if lines else 0, "lines": lines or {}}
 
 
@@ -464,5 +465,5 @@ async def get_model_loads(session_id: str) -> dict[str, Any]:
     session.touch()
 
     with session.lock:
-        loads = session.runner.get_loads()
+        loads = cols_to_named(session.runner.get_loads())
         return {"count": len(loads) if loads else 0, "loads": loads or {}}

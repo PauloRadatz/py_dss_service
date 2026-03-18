@@ -12,6 +12,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 
 from py_dss_service.common.errors import ScriptValidationError
 from py_dss_service.common.ids import generate_job_id
+from py_dss_service.common.records import cols_to_named
 from py_dss_service.common.time import utc_now_iso
 from py_dss_service.engine.validation import validate_dss_script
 from py_dss_service.schemas.job_spec import JobSpec, JobSubmitRequest, JobSubmitResponse
@@ -390,6 +391,10 @@ async def get_job_model(job_id: str) -> JobModelResponse:
     
     try:
         model = JobModelSnapshot.model_validate_json(model_file.read_text(encoding="utf-8"))
+        model.buses = cols_to_named(model.buses)
+        model.lines = cols_to_named(model.lines)
+        model.loads = cols_to_named(model.loads)
+        model.segments = cols_to_named(model.segments)
         return JobModelResponse(job_id=job_id, status="done", model=model)
     except Exception as e:
         raise HTTPException(
@@ -475,16 +480,15 @@ async def get_job_model_element(job_id: str, element_type: str) -> ModelElementR
     try:
         model = JobModelSnapshot.model_validate_json(model_file.read_text(encoding="utf-8"))
         
-        # Get the data for the requested element type
-        data = getattr(model, element_type, None)
-        count_attr = f"num_{element_type}"
-        count = getattr(model, count_attr, len(data) if data else 0)
+        raw_data = getattr(model, element_type, None)
+        named_data = cols_to_named(raw_data)
+        count = len(named_data) if named_data else 0
         
         return ModelElementResponse(
             job_id=job_id,
             element_type=element_type,
             count=count,
-            data=data,
+            data=named_data,
         )
     except Exception as e:
         raise HTTPException(

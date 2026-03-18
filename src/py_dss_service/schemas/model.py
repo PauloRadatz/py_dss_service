@@ -33,19 +33,23 @@ class JobModelSnapshot(BaseModel):
     )
     buses: Optional[dict[str, Any]] = Field(
         default=None,
-        description="Bus data as column-oriented records: {'name': [...], 'kv_base': [...], ...}",
+        description="Bus data keyed by name: {'bus1': {'kv_base': 12.47, ...}, ...}. "
+                    "Stored on disk as column-oriented records.",
     )
     lines: Optional[dict[str, Any]] = Field(
         default=None,
-        description="Line data as column-oriented records: {'name': [...], 'bus1': [...], ...}",
+        description="Line data keyed by name: {'line1': {'bus1': 'a', ...}, ...}. "
+                    "Stored on disk as column-oriented records.",
     )
     loads: Optional[dict[str, Any]] = Field(
         default=None,
-        description="Load data as column-oriented records: {'name': [...], 'bus1': [...], ...}",
+        description="Load data keyed by name: {'load1': {'bus1': 'a', ...}, ...}. "
+                    "Stored on disk as column-oriented records.",
     )
     segments: Optional[dict[str, Any]] = Field(
         default=None,
-        description="Segment data as column-oriented records: {'name': [...], 'bus1': [...], ...}",
+        description="Segment data keyed by name: {'seg1': {'bus1': 'a', ...}, ...}. "
+                    "Stored on disk as column-oriented records.",
     )
 
 
@@ -64,6 +68,9 @@ class ModelElementResponse(BaseModel):
     job_id: str
     element_type: str
     count: int
-    data: Optional[dict[str, Any]] = None
+    data: Optional[dict[str, Any]] = Field(
+        default=None,
+        description="Element data keyed by name: {'elem1': {prop: val, ...}, ...}",
+    )
     message: Optional[str] = None
 

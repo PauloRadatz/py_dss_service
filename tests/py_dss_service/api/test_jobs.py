@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from py_dss_service.api.main import create_app
 from py_dss_service.common.time import utc_now_iso
 from py_dss_service.schemas.job_spec import JobSpec
+from py_dss_service.schemas.model import JobModelSnapshot
 from py_dss_service.schemas.results import JobResult
 from py_dss_service.settings import Settings
 
@@ -240,3 +241,29 @@ class TestGetJobModel:
 
         response = client.get(f"/jobs/{job_id}/model/generators")
         assert response.status_code == 400
+
+    def test_model_element_returns_name_keyed_data(self, client, fake_settings):
+        """Verify column-oriented data on disk is served as name-keyed dict."""
+        job_id = "test-named-model"
+        spec = JobSpec(job_id=job_id, dss_script="Solve", created_at=utc_now_iso())
+        (fake_settings.jobs_done_dir / f"{job_id}.json").write_text(
+            spec.model_dump_json(), encoding="utf-8"
+        )
+        model = JobModelSnapshot(
+            job_id=job_id,
+            circuit_name="TestCkt",
+            num_lines=2,
+            lines={"name": ["line1", "line2"], "bus1": ["a", "c"], "bus2": ["b", "d"]},
+        )
+        (fake_settings.models_dir / f"{job_id}.json").write_text(
+            model.model_dump_json(), encoding="utf-8"
+        )
+
+        response = client.get(f"/jobs/{job_id}/model/lines")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["count"] == 2
+        assert data["data"] == {
+            "line1": {"bus1": "a", "bus2": "b"},
+            "line2": {"bus1": "c", "bus2": "d"},
+        }
