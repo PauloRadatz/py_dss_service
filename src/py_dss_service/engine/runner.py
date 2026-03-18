@@ -163,26 +163,6 @@ class DSSRunner:
             voltages_ln = self._extract_voltages_ln()
             if voltages_ln:
                 self.logger.info(f"[{job_id}] Extracted line-neutral voltages")
-            
-            voltages_ll = self._extract_voltages_ll()
-            if voltages_ll:
-                self.logger.info(f"[{job_id}] Extracted line-line voltages")
-            
-            currents = self._extract_currents()
-            if currents:
-                self.logger.info(f"[{job_id}] Extracted currents")
-            
-            powers = self._extract_powers()
-            if powers:
-                self.logger.info(f"[{job_id}] Extracted powers")
-            
-            loading_percent = self._extract_loading_percent()
-            if loading_percent:
-                self.logger.info(f"[{job_id}] Extracted loading percentages")
-            
-            violations = self._extract_violations()
-            if violations:
-                self.logger.info(f"[{job_id}] Extracted violations")
 
             execution_time = time.time() - start_time
 
