@@ -8,13 +8,11 @@ TODO: Stage 2+ - Replace with Redis/Celery worker.
 """
 
 import signal
-import sys
 import time
 
 from py_dss_service.logging import get_logger, setup_logging
 from py_dss_service.settings import get_settings
 from py_dss_service.worker.tasks import claim_job, process_job
-
 
 # Global flag for graceful shutdown
 _shutdown_requested = False
@@ -46,7 +44,7 @@ def main() -> None:
     signal.signal(signal.SIGINT, _signal_handler)
     signal.signal(signal.SIGTERM, _signal_handler)
 
-    print(f"Starting py-dss-service worker")
+    print("Starting py-dss-service worker")
     print(f"Data directory: {settings.pydss_data_dir.absolute()}")
     print(f"Poll interval: {settings.worker_poll_interval}s")
     print(f"Job timeout: {settings.worker_job_timeout}s")
@@ -84,4 +82,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

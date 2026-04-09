@@ -16,4 +16,3 @@ async def health_check() -> dict:
         {"status": "ok"} if the service is running
     """
     return {"status": "ok"}
-

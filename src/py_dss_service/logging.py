@@ -59,9 +59,7 @@ class JobLogger:
     def __enter__(self) -> logging.Logger:
         self.log_file.parent.mkdir(parents=True, exist_ok=True)
         self.handler = logging.FileHandler(self.log_file, encoding="utf-8")
-        self.handler.setFormatter(
-            logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-        )
+        self.handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
         self.logger.addHandler(self.handler)
         self.logger.setLevel(logging.DEBUG)
         return self.logger
@@ -70,4 +68,3 @@ class JobLogger:
         if self.handler is not None:
             self.handler.close()
             self.logger.removeHandler(self.handler)
-

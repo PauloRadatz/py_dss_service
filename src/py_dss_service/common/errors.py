@@ -31,4 +31,3 @@ class JobTimeoutError(PyDSSServiceError):
     """Raised when a job exceeds its timeout."""
 
     pass
-

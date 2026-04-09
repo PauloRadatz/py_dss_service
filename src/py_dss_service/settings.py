@@ -4,7 +4,6 @@ Application settings and configuration.
 Stage 1: Uses environment variables and filesystem paths.
 """
 
-import os
 from pathlib import Path
 from typing import Optional
 
@@ -14,17 +13,17 @@ from pydantic_settings import BaseSettings
 def _get_project_root() -> Path:
     """
     Get the project root directory.
-    
+
     Tries to find the project root by looking for common markers:
     - pyproject.toml
     - .git directory
     - src/py_dss_service directory
-    
+
     Falls back to current working directory if markers not found.
     """
     # Start from current file location
     current = Path(__file__).resolve().parent
-    
+
     # Walk up to find project root markers
     for parent in [current] + list(current.parents):
         if (parent / "pyproject.toml").exists():
@@ -33,7 +32,7 @@ def _get_project_root() -> Path:
             return parent
         if (parent / "src" / "py_dss_service").exists():
             return parent
-    
+
     # Fallback: use current working directory
     return Path.cwd()
 
@@ -69,7 +68,7 @@ class Settings(BaseSettings):
         "env_file": ".env",
         "env_file_encoding": "utf-8",
     }
-    
+
     def __init__(self, **kwargs):
         """Initialize settings, ensuring data_dir is absolute."""
         super().__init__(**kwargs)
@@ -134,4 +133,3 @@ def get_settings() -> Settings:
     if _settings is None:
         _settings = Settings()
     return _settings
-

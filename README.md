@@ -1,11 +1,12 @@
 # py-dss-service
 
-**Stage 1 Prototype**: FastAPI + filesystem-based job queue for OpenDSS simulations.
+**Stage 1 Prototype**: Docker + FastAPI + filesystem-based job queue for OpenDSS simulations.
 
 A lightweight service for running OpenDSS power flow simulations via HTTP API. Submit DSS scripts, poll for status, and retrieve voltage results.
 
 ## Features (Stage 1)
 
+- ✅ Docker Container
 - ✅ FastAPI REST API
 - ✅ Filesystem-based job queue (no external dependencies)
 - ✅ Separate worker process for DSS execution
@@ -16,7 +17,19 @@ A lightweight service for running OpenDSS power flow simulations via HTTP API. S
 
 ## Quick Start
 
-### 1. Install Dependencies
+### 1. Run The API and Worker
+
+#### Option A. Docker
+
+Open a terminal and run:
+
+```bash
+docker compose up
+```
+
+#### Option B. Host Install
+
+##### 1. Manually Install Dependencies
 
 ```bash
 # Create virtual environment (recommended)
@@ -32,7 +45,7 @@ source venv/bin/activate
 pip install -e .
 ```
 
-### 2. Start the API Server
+##### 2. Start the API Server
 
 Open a terminal and run:
 
@@ -47,7 +60,7 @@ Data directory: C:\path\to\py_dss_service\data
 API docs: http://127.0.0.1:8000/docs
 ```
 
-### 3. Start the Worker
+##### 3. Start the Worker
 
 Open a **second terminal**, activate the venv, and run:
 
@@ -64,7 +77,7 @@ Job timeout: 300s
 Press Ctrl+C to stop...
 ```
 
-### 4. Submit a Job
+### 2. Submit a Job
 
 Use curl, PowerShell, or any HTTP client:
 
@@ -98,7 +111,7 @@ Response:
 {"job_id": "20260116-103045-a1b2c3d4", "status": "queued"}
 ```
 
-### 5. Check Job Status
+### 3. Check Job Status
 
 ```bash
 curl http://127.0.0.1:8000/jobs/{job_id}
@@ -109,7 +122,7 @@ Response:
 {"job_id": "20260116-103045-a1b2c3d4", "status": "done", "created_at": "2026-01-16T10:30:45+00:00"}
 ```
 
-### 6. Get Results
+### 4. Get Results
 
 ```bash
 curl http://127.0.0.1:8000/jobs/{job_id}/result
@@ -252,6 +265,14 @@ See placeholder module READMEs for migration plans.
 
 ## Development
 
+### Using Docker
+
+```bash
+COMPOSE_PROFILES=test docker compose up --build
+```
+
+### Using Host Install
+
 ```bash
 # Install dev dependencies
 pip install -e ".[dev]"
@@ -261,6 +282,7 @@ pytest
 
 # Lint
 ruff check src/
+ruff format src/
 ```
 
 ## License

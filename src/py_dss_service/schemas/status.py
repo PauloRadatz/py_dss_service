@@ -36,4 +36,3 @@ class JobStatusResponse(BaseModel):
         default=None,
         description="Error message if status is failed",
     )
-

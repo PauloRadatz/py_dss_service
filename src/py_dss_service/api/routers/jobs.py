@@ -8,7 +8,7 @@ TODO: Stage 2+ - Replace with Redis queue + Postgres job tracking.
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, status
 
 from py_dss_service.common.errors import ScriptValidationError
 from py_dss_service.common.ids import generate_job_id
@@ -208,26 +208,26 @@ async def get_job_result(
 
     # Filter results by requested fields
     result_dict = result.model_dump()
-    
+
     if fields:
         # Parse requested fields
         requested_fields = [f.strip() for f in fields.split(",")]
-        
+
         # Valid result fields (excluding metadata fields)
         valid_fields = {
             "circuit_summary",
             "voltages_ln",
         }
-        
+
         # Check for invalid fields
         invalid_fields = [f for f in requested_fields if f not in valid_fields]
         if invalid_fields:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid field(s): {', '.join(invalid_fields)}. "
-                       f"Valid fields: {', '.join(sorted(valid_fields))}",
+                f"Valid fields: {', '.join(sorted(valid_fields))}",
             )
-        
+
         # Filter result_dict to only include requested fields + metadata
         filtered_result = {
             "job_id": result_dict["job_id"],
@@ -236,12 +236,12 @@ async def get_job_result(
             "completed_at": result_dict["completed_at"],
             "execution_time_seconds": result_dict.get("execution_time_seconds"),
         }
-        
+
         # Add requested fields
         for field in requested_fields:
             if field in result_dict:
                 filtered_result[field] = result_dict[field]
-        
+
         result_dict = filtered_result
 
     # For failed jobs, include a helpful message
@@ -282,14 +282,14 @@ def _get_result_file(job_id: str) -> Optional[Path]:
 def _load_job_result(job_id: str) -> JobResult:
     """Load and return job result, raising appropriate HTTP errors."""
     _require_job_complete(job_id)
-    
+
     result_file = _get_result_file(job_id)
     if result_file is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Result file not found for job: {job_id}",
         )
-    
+
     try:
         return JobResult.model_validate_json(result_file.read_text(encoding="utf-8"))
     except Exception as e:
@@ -303,7 +303,7 @@ def _load_job_result(job_id: str) -> JobResult:
 async def get_job_result_circuit_summary(job_id: str) -> dict:
     """
     Get circuit summary from job results.
-    
+
     Returns the circuit summary containing power flow summary data.
     """
     result = _load_job_result(job_id)
@@ -318,7 +318,7 @@ async def get_job_result_circuit_summary(job_id: str) -> dict:
 async def get_job_result_voltages_ln(job_id: str) -> dict:
     """
     Get line-neutral voltages from job results.
-    
+
     Returns voltage magnitudes and angles for each bus (line-to-neutral).
     """
     result = _load_job_result(job_id)
@@ -327,6 +327,7 @@ async def get_job_result_voltages_ln(job_id: str) -> dict:
         "field": "voltages_ln",
         "data": result.voltages_ln,
     }
+
 
 # =============================================================================
 # Model endpoints - retrieve saved model data for completed jobs
@@ -343,19 +344,19 @@ def _get_model_file(job_id: str) -> Optional[Path]:
 def _require_job_complete(job_id: str) -> None:
     """Check that job is complete, raise 404 otherwise."""
     _, job_status = _find_job_file(job_id)
-    
+
     if job_status == JobStatus.NOT_FOUND:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Job not found: {job_id}",
         )
-    
+
     if job_status == JobStatus.QUEUED:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Job is still queued: {job_id}. Model not yet available.",
         )
-    
+
     if job_status == JobStatus.RUNNING:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -367,28 +368,28 @@ def _require_job_complete(job_id: str) -> None:
 async def get_job_model(job_id: str) -> JobModelResponse:
     """
     Get the complete model snapshot for a completed job.
-    
+
     The model snapshot contains all circuit data captured after job execution:
     buses, lines, loads, transformers, capacitors, generators, PV systems, storage.
-    
+
     Args:
         job_id: The job ID to look up
-        
+
     Returns:
         Complete model snapshot
-        
+
     Raises:
         HTTPException 404: If job not found, not complete, or no model data
     """
     _require_job_complete(job_id)
-    
+
     model_file = _get_model_file(job_id)
     if model_file is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Model data not found for job: {job_id}",
         )
-    
+
     try:
         model = JobModelSnapshot.model_validate_json(model_file.read_text(encoding="utf-8"))
         model.buses = cols_to_named(model.buses)
@@ -407,22 +408,22 @@ async def get_job_model(job_id: str) -> JobModelResponse:
 async def get_job_model_summary(job_id: str) -> dict:
     """
     Get circuit summary from the job's model snapshot.
-    
+
     Args:
         job_id: The job ID
-        
+
     Returns:
         Circuit summary data
     """
     _require_job_complete(job_id)
-    
+
     model_file = _get_model_file(job_id)
     if model_file is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Model data not found for job: {job_id}",
         )
-    
+
     try:
         model = JobModelSnapshot.model_validate_json(model_file.read_text(encoding="utf-8"))
         return {
@@ -445,45 +446,44 @@ async def get_job_model_summary(job_id: str) -> dict:
 async def get_job_model_element(job_id: str, element_type: str) -> ModelElementResponse:
     """
     Get specific element data from the job's model snapshot.
-    
+
     Args:
         job_id: The job ID
         element_type: Type of element: buses, lines, loads, transformers,
                       capacitors, generators, pvsystems, storage, segments
-        
+
     Returns:
         Element data for the specified type
-        
+
     Raises:
         HTTPException 400: If invalid element type
         HTTPException 404: If job/model not found
     """
-    valid_types = {
-        "buses", "lines", "loads", "segments"
-    }
-    
+    valid_types = {"buses", "lines", "loads", "segments"}
+
     if element_type not in valid_types:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid element type: {element_type}. Valid types: {', '.join(sorted(valid_types))}",
+            detail="Invalid element type: "
+            "{element_type}. Valid types: {', '.join(sorted(valid_types))}",
         )
-    
+
     _require_job_complete(job_id)
-    
+
     model_file = _get_model_file(job_id)
     if model_file is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Model data not found for job: {job_id}",
         )
-    
+
     try:
         model = JobModelSnapshot.model_validate_json(model_file.read_text(encoding="utf-8"))
-        
+
         raw_data = getattr(model, element_type, None)
         named_data = cols_to_named(raw_data)
         count = len(named_data) if named_data else 0
-        
+
         return ModelElementResponse(
             job_id=job_id,
             element_type=element_type,
@@ -495,4 +495,3 @@ async def get_job_model_element(job_id: str, element_type: str) -> ModelElementR
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error reading model file: {e}",
         )
-
