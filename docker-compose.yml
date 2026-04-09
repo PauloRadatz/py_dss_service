@@ -1,0 +1,59 @@
+services:
+  api:
+    container_name: py-dss-api
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: api
+    image: py-dss-service:api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PYDSS_DATA_DIR=/app/data
+      - PYDSS_API_HOST=0.0.0.0
+      - PYDSS_API_PORT=8000
+      - PYDSS_LOG_LEVEL=INFO
+    depends_on:
+      - worker
+  worker:
+    container_name: py-dss-worker
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: worker
+    image: py-dss-service:worker
+    command: python -m py_dss_service.worker.main
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PYDSS_DATA_DIR=/app/data
+      - PYDSS_WORKER_POLL_INTERVAL=1.0
+      - PYDSS_WORKER_JOB_TIMEOUT=300
+      - PYDSS_LOG_LEVEL=INFO
+  test:
+    container_name: py-dss-test
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: test
+    image: py-dss-service:test
+    command: python -m pytest -q
+    depends_on:
+      - api
+    profiles:
+      - test
+    environment:
+      - PYDSS_DATA_DIR=/app/data
+  linter:
+    container_name: py-dss-linter
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: lint
+    image: py-dss-service:linter
+    profiles:
+      - test
+    volumes:
+      - ./:/app
