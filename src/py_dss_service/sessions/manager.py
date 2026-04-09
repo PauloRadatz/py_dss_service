@@ -7,9 +7,8 @@ Handles session lifecycle: create, store, cleanup, and access.
 import asyncio
 import logging
 import threading
-import time
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Optional
 
 from py_dss_service.common.ids import generate_job_id
 from py_dss_service.common.time import utc_now_iso
@@ -237,4 +236,3 @@ def get_session_manager() -> SessionManager:
             cleanup_interval_seconds=settings.session_cleanup_interval,
         )
     return _session_manager
-

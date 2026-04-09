@@ -21,4 +21,3 @@ def generate_job_id() -> str:
     timestamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
     short_uuid = uuid.uuid4().hex[:8]
     return f"{timestamp}-{short_uuid}"
-

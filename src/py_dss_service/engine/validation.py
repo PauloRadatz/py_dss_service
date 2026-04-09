@@ -49,7 +49,8 @@ def validate_dss_script(
     script_bytes = len(script.encode("utf-8"))
     if script_bytes > max_length:
         raise ScriptValidationError(
-            f"Script exceeds maximum length: {script_bytes} bytes > {max_length} bytes ({max_length // 1024} KB)"
+            "Script exceeds maximum length: "
+            "{script_bytes} bytes > {max_length} bytes ({max_length // 1024} KB)"
         )
 
     # Check for empty script
@@ -94,4 +95,3 @@ def get_script_lines(script: str) -> list[str]:
             continue
         lines.append(stripped)
     return lines
-

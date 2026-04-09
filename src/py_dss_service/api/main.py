@@ -21,9 +21,9 @@ async def lifespan(app: FastAPI):
     # Startup: Start session cleanup task
     session_manager = get_session_manager()
     await session_manager.start_cleanup_task()
-    
+
     yield  # App is running
-    
+
     # Shutdown: Stop session cleanup task
     await session_manager.stop_cleanup_task()
 
@@ -47,7 +47,7 @@ def create_app() -> FastAPI:
     # Register routers
     app.include_router(health_router)
     app.include_router(sessions_router)  # Sessions API (interactive)
-    app.include_router(jobs_router)      # Jobs API (batch)
+    app.include_router(jobs_router)  # Jobs API (batch)
 
     return app
 
@@ -75,4 +75,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -17,24 +17,24 @@ class JobResult(BaseModel):
     """
 
     job_id: str = Field(..., description="The job ID this result belongs to")
-    
+
     simulation_type: Literal["snapshot", "qsts"] = Field(
         default="snapshot",
         description="Type of simulation that was run",
     )
-    
+
     converged: bool = Field(..., description="Whether the power flow solution converged")
-    
+
     circuit_summary: Optional[dict[str, Any]] = Field(
         default=None,
         description="Circuit summary as column-oriented records. "
-                    "Example: {'P feeder (kW)': [100.0], 'Q feeder (kvar)': [50.0], ...}",
+        "Example: {'P feeder (kW)': [100.0], 'Q feeder (kvar)': [50.0], ...}",
     )
 
     voltages_ln: Optional[dict[str, Any]] = Field(
         default=None,
         description="Line-neutral voltages: {'magnitude': {bus: {node: val}}, "
-                    "'angle': {bus: {node: val}}}",
+        "'angle': {bus: {node: val}}}",
     )
 
     # Execution metadata
@@ -62,4 +62,3 @@ class JobResultResponse(BaseModel):
     status: str
     result: Optional[JobResult] = None
     message: Optional[str] = None
-

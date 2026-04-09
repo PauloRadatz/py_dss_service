@@ -384,7 +384,7 @@ async def get_results_circuit_summary(session_id: str) -> dict[str, Any]:
     session = _get_session_or_404(session_id)
     _require_results(session)
     session.touch()
-    
+
     return {
         "session_id": session_id,
         "field": "circuit_summary",
@@ -398,12 +398,13 @@ async def get_results_voltages_ln(session_id: str) -> dict[str, Any]:
     session = _get_session_or_404(session_id)
     _require_results(session)
     session.touch()
-    
+
     return {
         "session_id": session_id,
         "field": "voltages_ln",
         "data": session.last_results.voltages_ln,
     }
+
 
 # =============================================================================
 # Model Query Endpoints
@@ -428,7 +429,9 @@ async def get_model_summary(session_id: str) -> dict[str, Any]:
             "num_buses": dss.circuit.num_buses,
             "num_lines": len(dss.lines.names) if dss.lines.names != [""] else 0,
             "num_loads": len(dss.loads.names) if dss.loads.names != [""] else 0,
-            "num_transformers": len(dss.transformers.names) if dss.transformers.names != [""] else 0,
+            "num_transformers": len(dss.transformers.names)
+            if dss.transformers.names != [""]
+            else 0,
             "data": summary_data,
         }
 

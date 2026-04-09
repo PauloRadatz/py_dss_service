@@ -80,10 +80,7 @@ class DSSRunner:
             elif action_type == "add_line_in_vsource":
                 add_meter = action.add_meter
                 add_monitors = action.add_monitors
-                dss_tools.model.add_line_in_vsource(
-                    add_meter=add_meter,
-                    add_monitors=add_monitors
-                )
+                dss_tools.model.add_line_in_vsource(add_meter=add_meter, add_monitors=add_monitors)
                 self.logger.info(
                     f"[{job_id}] Action {action_num}: [toolkit] Added line in vsource "
                     f"(meter={add_meter}, monitors={add_monitors})"
@@ -94,7 +91,9 @@ class DSSRunner:
 
         except Exception as e:
             self.logger.error(f"[{job_id}] Error applying action {action_num}: {e}")
-            raise JobExecutionError(f"Failed to apply action {action_num} ({action.type}): {e}") from e
+            raise JobExecutionError(
+                f"Failed to apply action {action_num} ({action.type}): {e}"
+            ) from e
 
     def execute(
         self,
@@ -136,7 +135,7 @@ class DSSRunner:
             self.logger.info(f"[{job_id}] Executing {len(lines)} script lines")
 
             for i, line in enumerate(lines):
-                self.logger.debug(f"[{job_id}] Line {i+1}: {line}")
+                self.logger.debug(f"[{job_id}] Line {i + 1}: {line}")
                 dss.text(line)
 
             # Process actions in order
@@ -155,11 +154,13 @@ class DSSRunner:
 
             # Extract ALL results from py-dss-toolkit (run once, save all)
             self.logger.info(f"[{job_id}] Extracting all available results...")
-            
+
             circuit_summary = self._extract_circuit_summary()
             if circuit_summary:
-                self.logger.info(f"[{job_id}] Extracted circuit summary ({len(circuit_summary)} quantities)")
-            
+                self.logger.info(
+                    f"[{job_id}] Extracted circuit summary ({len(circuit_summary)} quantities)"
+                )
+
             voltages_ln = self._extract_voltages_ln()
             if voltages_ln:
                 self.logger.info(f"[{job_id}] Extracted line-neutral voltages")
@@ -338,4 +339,3 @@ class DSSRunner:
             "loads": loads,
             "segments": segments,
         }
-

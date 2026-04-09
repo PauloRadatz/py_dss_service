@@ -25,7 +25,4 @@ def cols_to_named(
     if not names:
         return None
     cols = {k: v for k, v in records.items() if k != key}
-    return {
-        name: {col: vals[i] for col, vals in cols.items()}
-        for i, name in enumerate(names)
-    }
+    return {name: {col: vals[i] for col, vals in cols.items()} for i, name in enumerate(names)}

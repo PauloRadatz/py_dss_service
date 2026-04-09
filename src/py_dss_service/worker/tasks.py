@@ -116,7 +116,7 @@ def process_job(
 
             # Write result (using absolute path)
             _write_result_abs(results_dir_abs, result)
-            
+
             # Write model snapshot (using absolute path)
             if model_snapshot:
                 _write_model_abs(models_dir_abs, model_snapshot)
@@ -127,15 +127,39 @@ def process_job(
 
         except JobTimeoutError as e:
             job_logger.error(f"Job timed out: {e}")
-            _handle_failure_abs(results_dir_abs, failed_dir_abs, job_file_abs, job_id, str(e), start_time, parent_logger)
+            _handle_failure_abs(
+                results_dir_abs,
+                failed_dir_abs,
+                job_file_abs,
+                job_id,
+                str(e),
+                start_time,
+                parent_logger,
+            )
 
         except JobExecutionError as e:
             job_logger.error(f"Job execution failed: {e}")
-            _handle_failure_abs(results_dir_abs, failed_dir_abs, job_file_abs, job_id, str(e), start_time, parent_logger)
+            _handle_failure_abs(
+                results_dir_abs,
+                failed_dir_abs,
+                job_file_abs,
+                job_id,
+                str(e),
+                start_time,
+                parent_logger,
+            )
 
         except Exception as e:
             job_logger.error(f"Unexpected error: {e}")
-            _handle_failure_abs(results_dir_abs, failed_dir_abs, job_file_abs, job_id, f"Unexpected error: {e}", start_time, parent_logger)
+            _handle_failure_abs(
+                results_dir_abs,
+                failed_dir_abs,
+                job_file_abs,
+                job_id,
+                f"Unexpected error: {e}",
+                start_time,
+                parent_logger,
+            )
 
 
 def _execute_with_timeout(
@@ -153,7 +177,7 @@ def _execute_with_timeout(
     This is a best-effort implementation that checks elapsed time.
 
     TODO: Stage 2+ - Use proper process isolation with hard timeout.
-    
+
     Returns:
         Tuple of (JobResult, model_snapshot_dict or None)
     """
@@ -171,14 +195,14 @@ def _execute_with_timeout(
             result_container["result"] = runner.execute(
                 job_id, dss_script, start_time, actions=actions
             )
-            
+
             # Extract model snapshot after simulation (circuit is still loaded)
             try:
                 model_container["model"] = runner.extract_model_snapshot(job_id)
             except Exception as e:
                 logger.warning(f"Error extracting model snapshot: {e}")
                 model_container["model"] = None
-                
+
         except Exception as e:
             error_container["error"] = e
 
@@ -252,4 +276,3 @@ def _handle_failure_abs(
 
     _write_result_abs(results_dir, result)
     _move_job_abs(job_file, failed_dir, logger)
-
